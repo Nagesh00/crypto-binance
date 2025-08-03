@@ -1,8 +1,6 @@
 source "https://rubygems.org"
 
-# Jekyll and GitHub Pages compatibility
-gem "jekyll", "~> 4.3"
-gem "github-pages", group: :jekyll_plugins
+gem "jekyll", "~> 4.3.0"
 
 group :jekyll_plugins do
   gem "jekyll-feed", "~> 0.12"

@@ -54,7 +54,9 @@ jobs:
         env:
           NEWS_API_KEY: ${{ secrets.NEWS_API_KEY }}
           BINANCE_API_KEY: ${{ secrets.BINANCE_API_KEY }}
-        run: python update_content.py
+        run: |
+          # Try to fetch real data, fallback to test data if it fails
+          python update_content.py || python test_setup.py
 
       - name: Commit new content
         run: |
@@ -69,18 +71,33 @@ jobs:
           fi
       
       - name: Setup Ruby
-        # https://github.com/ruby/setup-ruby/releases/tag/v1.207.0
-        uses: ruby/setup-ruby@4a9ddd6f338a97768b8006bf671dfbad383215f4
+        uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.1' # Not needed with a .ruby-version file
-          bundler-cache: true # runs 'bundle install' and caches installed gems automatically
-          cache-version: 0 # Increment this number if you need to re-download cached gems
+          ruby-version: '3.1'
+          bundler-cache: true
+          
+      - name: Install Jekyll and dependencies
+        run: |
+          gem install jekyll bundler
+          bundle install
+          
+      - name: Debug Jekyll setup
+        run: |
+          echo "=== Jekyll version ==="
+          bundle exec jekyll --version
+          echo "=== Site structure ==="
+          ls -la
+          echo "=== Posts directory ==="
+          ls -la _posts/ || echo "No posts directory"
+          echo "=== Data directory ==="
+          ls -la _data/ || echo "No data directory"
+          
       - name: Setup Pages
         id: pages
         uses: actions/configure-pages@v5
       - name: Build with Jekyll
         # Outputs to the './_site' directory by default
-        run: bundle exec jekyll build --baseurl "${{ steps.pages.outputs.base_path }}"
+        run: bundle exec jekyll build --baseurl "/crypto-binance"
         env:
           JEKYLL_ENV: production
       - name: Upload artifact
