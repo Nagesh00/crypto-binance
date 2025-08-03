@@ -7,7 +7,8 @@ baseurl: "/crypto-binance"
 # Build settings
 markdown: kramdown
 highlighter: rouge
-theme: minima
+# Remove theme to avoid conflicts with custom layouts
+# theme: minima
 
 # Collections
 collections:
