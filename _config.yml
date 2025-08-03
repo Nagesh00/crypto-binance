@@ -1,0 +1,43 @@
+# Jekyll Configuration
+title: "Crypto News & Market Data"
+description: "Automated crypto news and real-time market data from Binance"
+url: "https://nagesh00.github.io"
+baseurl: "/crypto-binance"
+
+# Build settings
+markdown: kramdown
+highlighter: rouge
+theme: minima
+
+# Collections
+collections:
+  posts:
+    output: true
+    permalink: /:year/:month/:day/:title/
+
+# Plugin settings
+plugins:
+  - jekyll-feed
+  - jekyll-sitemap
+
+# Exclude from processing
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor/bundle/
+  - vendor/cache/
+  - vendor/gems/
+  - vendor/ruby/
+  - update_content.py
+  - requirements.txt
+  - README.md
+  - package.json
+  - next.config.ts
+  - tsconfig.json
+  - eslint.config.mjs
+  - postcss.config.mjs
+  - next-env.d.ts
+
+# Timezone
+timezone: UTC

@@ -1,0 +1,362 @@
+---
+layout: default
+title: "Crypto News"
+---
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>
+        <i class="fas fa-newspaper me-2 text-success"></i>
+        Cryptocurrency News
+    </h1>
+    <div class="d-flex gap-2">
+        <select id="categoryFilter" class="form-select form-select-sm">
+            <option value="">All Categories</option>
+            <option value="news">News</option>
+            <option value="market">Market Analysis</option>
+            <option value="analysis">Analysis</option>
+        </select>
+        <select id="sortBy" class="form-select form-select-sm">
+            <option value="date">Sort by Date</option>
+            <option value="title">Sort by Title</option>
+            <option value="author">Sort by Author</option>
+        </select>
+    </div>
+</div>
+
+<!-- News Search -->
+<div class="row mb-4">
+    <div class="col-md-8">
+        <input type="text" id="newsSearch" class="form-control" placeholder="Search news articles...">
+    </div>
+    <div class="col-md-4">
+        <div class="text-muted small">
+            <i class="fas fa-sync-alt me-1"></i>
+            Auto-updated every 2 hours
+        </div>
+    </div>
+</div>
+
+<!-- News Articles -->
+<div id="newsContainer">
+    {% assign all_posts = site.posts %}
+    {% if all_posts.size > 0 %}
+    <div class="row" id="newsGrid">
+        {% for post in all_posts %}
+        <div class="col-lg-6 mb-4 news-item" 
+             data-category="{{ post.categories | join: ' ' | downcase }}"
+             data-date="{{ post.date | date: '%Y-%m-%d' }}"
+             data-title="{{ post.title | downcase }}"
+             data-author="{{ post.author | downcase }}">
+            <div class="card h-100 shadow-sm news-card">
+                {% if post.image %}
+                <img src="{{ post.image }}" class="card-img-top news-image" alt="{{ post.title }}" style="height: 200px;">
+                {% endif %}
+                
+                <div class="card-body d-flex flex-column">
+                    <!-- Categories badges -->
+                    {% if post.categories %}
+                    <div class="mb-2">
+                        {% for category in post.categories %}
+                            {% case category %}
+                                {% when 'news' %}
+                                    <span class="badge bg-success">{{ category | capitalize }}</span>
+                                {% when 'market' %}
+                                    <span class="badge bg-primary">{{ category | capitalize }}</span>
+                                {% when 'analysis' %}
+                                    <span class="badge bg-info">{{ category | capitalize }}</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">{{ category | capitalize }}</span>
+                            {% endcase %}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    
+                    <h5 class="card-title">
+                        <a href="{{ post.url }}" class="text-decoration-none">
+                            {{ post.title }}
+                        </a>
+                    </h5>
+                    
+                    <p class="card-text flex-grow-1">
+                        {{ post.excerpt | strip_html | truncate: 150 }}
+                    </p>
+                    
+                    <!-- Article metadata -->
+                    <div class="mt-auto">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <small class="text-muted">
+                                <i class="fas fa-calendar me-1"></i>
+                                {{ post.date | date: "%B %d, %Y" }}
+                            </small>
+                            <small class="text-muted">
+                                <i class="fas fa-user me-1"></i>
+                                {{ post.author }}
+                            </small>
+                        </div>
+                        
+                        <!-- Tags -->
+                        {% if post.tags %}
+                        <div class="mb-2">
+                            {% for tag in post.tags limit:3 %}
+                                <span class="badge bg-light text-dark me-1">#{{ tag }}</span>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a href="{{ post.url }}" class="btn btn-outline-primary btn-sm">
+                                Read More
+                            </a>
+                            {% if post.source_url %}
+                            <a href="{{ post.source_url }}" target="_blank" class="btn btn-outline-secondary btn-sm">
+                                <i class="fas fa-external-link-alt me-1"></i>
+                                Source
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Pagination -->
+    <div class="d-flex justify-content-center mt-4">
+        <nav>
+            <ul class="pagination" id="newsPagination">
+                <!-- Pagination will be generated by JavaScript -->
+            </ul>
+        </nav>
+    </div>
+    
+    {% else %}
+    <!-- No articles available -->
+    <div class="text-center py-5">
+        <i class="fas fa-newspaper fa-4x text-muted mb-4"></i>
+        <h3 class="text-muted">No News Articles Available</h3>
+        <p class="lead text-muted">
+            News articles will appear here once the automated system fetches them.
+        </p>
+        <p class="text-muted">
+            The system runs every 2 hours to fetch the latest cryptocurrency news from trusted sources.
+        </p>
+        <div class="mt-4">
+            <a href="/" class="btn btn-primary">
+                <i class="fas fa-home me-2"></i>
+                Back to Home
+            </a>
+            <button class="btn btn-outline-secondary" onclick="location.reload()">
+                <i class="fas fa-sync-alt me-2"></i>
+                Refresh Page
+            </button>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- News Statistics -->
+{% if all_posts.size > 0 %}
+<div class="row mt-5">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-chart-bar me-2"></i>News Statistics</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-3">
+                        <h4 class="text-primary">{{ all_posts.size }}</h4>
+                        <p class="mb-0">Total Articles</p>
+                    </div>
+                    <div class="col-md-3">
+                        <h4 class="text-success">
+                            {{ all_posts | where_exp: "post", "post.categories contains 'news'" | size }}
+                        </h4>
+                        <p class="mb-0">News Articles</p>
+                    </div>
+                    <div class="col-md-3">
+                        <h4 class="text-info">
+                            {{ all_posts | where_exp: "post", "post.categories contains 'market'" | size }}
+                        </h4>
+                        <p class="mb-0">Market Analysis</p>
+                    </div>
+                    <div class="col-md-3">
+                        <h4 class="text-warning">
+                            {{ all_posts | group_by: 'author' | size }}
+                        </h4>
+                        <p class="mb-0">News Sources</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const newsItems = document.querySelectorAll('.news-item');
+    const searchInput = document.getElementById('newsSearch');
+    const categoryFilter = document.getElementById('categoryFilter');
+    const sortBy = document.getElementById('sortBy');
+    
+    let currentPage = 1;
+    const itemsPerPage = 8;
+    
+    // Search functionality
+    searchInput.addEventListener('input', function() {
+        filterAndSort();
+    });
+    
+    // Category filter
+    categoryFilter.addEventListener('change', function() {
+        filterAndSort();
+    });
+    
+    // Sort functionality
+    sortBy.addEventListener('change', function() {
+        filterAndSort();
+    });
+    
+    function filterAndSort() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const selectedCategory = categoryFilter.value.toLowerCase();
+        const sortCriteria = sortBy.value;
+        
+        let visibleItems = Array.from(newsItems).filter(item => {
+            const title = item.dataset.title;
+            const author = item.dataset.author;
+            const category = item.dataset.category;
+            
+            const matchesSearch = title.includes(searchTerm) || author.includes(searchTerm);
+            const matchesCategory = !selectedCategory || category.includes(selectedCategory);
+            
+            return matchesSearch && matchesCategory;
+        });
+        
+        // Sort items
+        visibleItems.sort((a, b) => {
+            switch(sortCriteria) {
+                case 'date':
+                    return new Date(b.dataset.date) - new Date(a.dataset.date);
+                case 'title':
+                    return a.dataset.title.localeCompare(b.dataset.title);
+                case 'author':
+                    return a.dataset.author.localeCompare(b.dataset.author);
+                default:
+                    return 0;
+            }
+        });
+        
+        // Hide all items
+        newsItems.forEach(item => item.style.display = 'none');
+        
+        // Show filtered and sorted items with pagination
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+        
+        visibleItems.slice(startIndex, endIndex).forEach(item => {
+            item.style.display = 'block';
+        });
+        
+        // Update pagination
+        updatePagination(visibleItems.length);
+        
+        // Show "no results" message if needed
+        const noResults = document.getElementById('noResults');
+        if (visibleItems.length === 0 && !noResults) {
+            const newsContainer = document.getElementById('newsContainer');
+            const noResultsDiv = document.createElement('div');
+            noResultsDiv.id = 'noResults';
+            noResultsDiv.className = 'text-center py-5';
+            noResultsDiv.innerHTML = `
+                <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                <h4 class="text-muted">No articles found</h4>
+                <p class="text-muted">Try adjusting your search criteria or filters.</p>
+            `;
+            newsContainer.appendChild(noResultsDiv);
+        } else if (visibleItems.length > 0 && noResults) {
+            noResults.remove();
+        }
+    }
+    
+    function updatePagination(totalItems) {
+        const totalPages = Math.ceil(totalItems / itemsPerPage);
+        const pagination = document.getElementById('newsPagination');
+        
+        if (totalPages <= 1) {
+            pagination.innerHTML = '';
+            return;
+        }
+        
+        let paginationHTML = '';
+        
+        // Previous button
+        if (currentPage > 1) {
+            paginationHTML += `<li class="page-item"><a class="page-link" href="#" data-page="${currentPage - 1}">Previous</a></li>`;
+        }
+        
+        // Page numbers
+        for (let i = 1; i <= totalPages; i++) {
+            if (i === currentPage) {
+                paginationHTML += `<li class="page-item active"><span class="page-link">${i}</span></li>`;
+            } else {
+                paginationHTML += `<li class="page-item"><a class="page-link" href="#" data-page="${i}">${i}</a></li>`;
+            }
+        }
+        
+        // Next button
+        if (currentPage < totalPages) {
+            paginationHTML += `<li class="page-item"><a class="page-link" href="#" data-page="${currentPage + 1}">Next</a></li>`;
+        }
+        
+        pagination.innerHTML = paginationHTML;
+        
+        // Add click handlers
+        pagination.querySelectorAll('a.page-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                currentPage = parseInt(this.dataset.page);
+                filterAndSort();
+                window.scrollTo({top: 0, behavior: 'smooth'});
+            });
+        });
+    }
+    
+    // Initial load
+    filterAndSort();
+});
+</script>
+
+<style>
+.news-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.news-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1) !important;
+}
+
+.news-image {
+    object-fit: cover;
+}
+
+.badge {
+    font-size: 0.7em;
+}
+
+#newsSearch {
+    border-radius: 20px;
+}
+
+.pagination .page-link {
+    color: #007bff;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+</style>

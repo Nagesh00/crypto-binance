@@ -1,0 +1,136 @@
+---
+layout: default
+---
+
+<div class="row">
+    <div class="col-lg-8">
+        <article class="card">
+            {% if page.image %}
+            <img src="{{ page.image }}" class="card-img-top news-image" alt="{{ page.title }}">
+            {% endif %}
+            
+            <div class="card-body">
+                <h1 class="card-title">{{ page.title }}</h1>
+                
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <small class="text-muted">
+                            <i class="fas fa-calendar me-1"></i>
+                            {{ page.date | date: "%B %d, %Y at %I:%M %p" }}
+                        </small>
+                    </div>
+                    <div>
+                        <small class="text-muted">
+                            <i class="fas fa-user me-1"></i>
+                            {{ page.author }}
+                        </small>
+                    </div>
+                </div>
+
+                {% if page.categories %}
+                <div class="mb-3">
+                    {% for category in page.categories %}
+                        <span class="badge bg-primary me-1">{{ category }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <div class="content">
+                    {{ content }}
+                </div>
+
+                {% if page.source_url %}
+                <div class="alert alert-info mt-4">
+                    <i class="fas fa-external-link-alt me-2"></i>
+                    <strong>Source:</strong> 
+                    <a href="{{ page.source_url }}" target="_blank" rel="noopener">
+                        Read the full article at {{ page.author }}
+                    </a>
+                </div>
+                {% endif %}
+
+                {% if page.tags %}
+                <div class="mt-4">
+                    <h6>Tags:</h6>
+                    {% for tag in page.tags %}
+                        <span class="badge bg-secondary me-1">#{{ tag }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+        </article>
+
+        <!-- Navigation between posts -->
+        <div class="row mt-4">
+            <div class="col-6">
+                {% if page.previous.url %}
+                <a href="{{ page.previous.url }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-chevron-left me-1"></i>Previous Post
+                </a>
+                {% endif %}
+            </div>
+            <div class="col-6 text-end">
+                {% if page.next.url %}
+                <a href="{{ page.next.url }}" class="btn btn-outline-secondary">
+                    Next Post<i class="fas fa-chevron-right ms-1"></i>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-chart-line me-2"></i>Quick Market View</h5>
+            </div>
+            <div class="card-body">
+                {% if site.data.market_data.coins %}
+                    {% for coin in site.data.market_data.coins limit:5 %}
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <strong>{{ coin.symbol }}</strong>
+                        <div class="text-end">
+                            <div class="crypto-price">${{ coin.lastPrice | round: 4 }}</div>
+                            {% if coin.priceChangePercent contains "-" %}
+                                <small class="price-down">{{ coin.priceChangePercent | round: 2 }}%</small>
+                            {% else %}
+                                <small class="price-up">+{{ coin.priceChangePercent | round: 2 }}%</small>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <hr>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted">Market data loading...</p>
+                {% endif %}
+                
+                <a href="{{ '/market' | relative_url }}" class="btn btn-primary btn-sm w-100">
+                    View Full Market Data
+                </a>
+            </div>
+        </div>
+
+        <!-- Recent Posts -->
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5><i class="fas fa-newspaper me-2"></i>Recent News</h5>
+            </div>
+            <div class="card-body">
+                {% for post in site.posts limit:5 %}
+                    {% unless post.url == page.url %}
+                    <div class="mb-3">
+                        <a href="{{ post.url }}" class="text-decoration-none">
+                            <h6 class="mb-1">{{ post.title | truncate: 60 }}</h6>
+                        </a>
+                        <small class="text-muted">
+                            {{ post.date | date: "%b %d, %Y" }}
+                        </small>
+                    </div>
+                    <hr>
+                    {% endunless %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
