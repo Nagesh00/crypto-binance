@@ -1,0 +1,89 @@
+name: Deploy Static Site
+
+on:
+  push:
+    branches: [ master ]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests python-dateutil
+
+      - name: Create directories
+        run: |
+          mkdir -p _data
+          mkdir -p _posts
+
+      - name: Create fallback data (if API keys missing)
+        run: |
+          python -c "
+          import json
+          import os
+          from datetime import datetime, timezone
+          
+          # Create fallback market data
+          fallback_data = {
+              'last_updated': datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z'),
+              'coins': [
+                  {'symbol': 'BTCUSDT', 'lastPrice': '65000.00', 'priceChangePercent': '2.50', 'quoteVolume': '1500000000'},
+                  {'symbol': 'ETHUSDT', 'lastPrice': '3200.00', 'priceChangePercent': '1.80', 'quoteVolume': '800000000'},
+                  {'symbol': 'BNBUSDT', 'lastPrice': '580.00', 'priceChangePercent': '-0.50', 'quoteVolume': '200000000'},
+                  {'symbol': 'SOLUSDT', 'lastPrice': '180.00', 'priceChangePercent': '3.20', 'quoteVolume': '300000000'},
+                  {'symbol': 'XRPUSDT', 'lastPrice': '0.65', 'priceChangePercent': '1.10', 'quoteVolume': '400000000'}
+              ]
+          }
+          
+          with open('_data/market_data.json', 'w') as f:
+              json.dump(fallback_data, f, indent=2)
+          
+          print('✅ Created fallback market data')
+          "
+
+      - name: Try to update with real data (if API keys available)
+        env:
+          BINANCE_API_KEY: ${{ secrets.BINANCE_API_KEY }}
+          NEWS_API_KEY: ${{ secrets.NEWS_API_KEY }}
+        run: |
+          if [ -n "$BINANCE_API_KEY" ] && [ -n "$NEWS_API_KEY" ]; then
+            echo "🔑 API keys found - fetching real data"
+            python update_content.py || echo "⚠️ API fetch failed, using fallback data"
+          else
+            echo "⚠️ API keys not found - using fallback data"
+          fi
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload to GitHub Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
