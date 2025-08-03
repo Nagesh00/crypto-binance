@@ -31,13 +31,15 @@ exclude:
   - vendor/ruby/
   - update_content.py
   - requirements.txt
-  - README.md
   - package.json
   - next.config.ts
   - tsconfig.json
   - eslint.config.mjs
   - postcss.config.mjs
   - next-env.d.ts
+  - .github/
+  - API_SETUP_COMPLETE.md
+  - SETUP.md
 
 # Timezone
 timezone: UTC

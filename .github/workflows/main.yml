@@ -14,7 +14,7 @@ on:
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -55,40 +55,7 @@ jobs:
           BINANCE_API_KEY: ${{ secrets.BINANCE_API_KEY }}
         run: python ./update_content.py
 
-      # 5. Setup Ruby for Jekyll
-      - name: Setup Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.1'
-          bundler-cache: true
-
-      # 6. Setup Pages
-      - name: Setup Pages
-        id: pages
-        uses: actions/configure-pages@v4
-
-      # 7. Install Jekyll dependencies
-      - name: Install Jekyll dependencies
-        run: |
-          gem install bundler jekyll
-          bundle init
-          echo 'gem "jekyll", "~> 4.3"' >> Gemfile
-          echo 'gem "minima", "~> 2.5"' >> Gemfile
-          echo 'gem "jekyll-feed", "~> 0.12"' >> Gemfile
-          echo 'gem "jekyll-sitemap"' >> Gemfile
-          bundle install
-
-      # 8. Build with Jekyll
-      - name: Build with Jekyll
-        run: bundle exec jekyll build --baseurl "${{ steps.pages.outputs.base_path }}"
-        env:
-          JEKYLL_ENV: production
-
-      # 9. Upload artifact
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-
-      # 10. Commit and push if there are changes
+      # 5. Commit and push if there are changes
       - name: Commit and push if there are changes
         run: |
           git config --global user.name "Automated Publisher"
@@ -97,6 +64,34 @@ jobs:
           # Check if there are changes to commit
           git diff --staged --quiet || git commit -m "Automated Content Update - $(date)"
           git push
+
+      # 6. Setup Ruby for Jekyll
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.1'
+          bundler-cache: true
+
+      # 7. Setup Pages
+      - name: Setup Pages
+        id: pages
+        uses: actions/configure-pages@v4
+
+      # 8. Install Jekyll dependencies
+      - name: Install Jekyll dependencies
+        run: |
+          gem install bundler jekyll
+          bundle install
+
+      # 9. Build with Jekyll
+      - name: Build with Jekyll
+        run: bundle exec jekyll build --baseurl "${{ steps.pages.outputs.base_path }}"
+        env:
+          JEKYLL_ENV: production
+
+      # 10. Upload artifact
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
 
   # Deployment job
   deploy:
