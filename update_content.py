@@ -1,7 +1,7 @@
 import os
 import requests
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 import re
 
 # --- CONFIGURATION ---
@@ -37,7 +37,7 @@ def fetch_market_data():
         
         # Add timestamp to the data
         enriched_data = {
-            "last_updated": datetime.utcnow().isoformat() + "Z",
+            "last_updated": datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z'),
             "coins": market_data
         }
         
@@ -144,7 +144,7 @@ def process_articles(articles, source_type='newsapi'):
             else:
                 pub_date = datetime.strptime(published_at, '%Y-%m-%d %H:%M:%S')
         except:
-            pub_date = datetime.utcnow()
+            pub_date = datetime.now(timezone.utc)
             
         filename_date = pub_date.strftime('%Y-%m-%d')
         filename = f"{filename_date}-{title_slug[:50].lower()}.md"
@@ -209,7 +209,7 @@ def create_market_summary():
         return
     
     # Create market summary
-    today = datetime.utcnow().strftime('%Y-%m-%d')
+    today = datetime.now(timezone.utc).strftime('%Y-%m-%d')
     filename = f"{today}-market-summary.md"
     filepath = os.path.join(POSTS_DIR, filename)
     
@@ -228,7 +228,7 @@ def create_market_summary():
     content = f"""---
 layout: post
 title: "Daily Market Summary - {today}"
-date: {datetime.utcnow().isoformat()}Z
+date: {datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z')}
 author: "Automated Market Analysis"
 categories: [crypto, market, analysis]
 tags: [market-summary, daily, analysis]

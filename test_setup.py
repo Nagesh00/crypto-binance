@@ -4,7 +4,7 @@ Simple test script to validate the site setup without external API calls
 """
 import os
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 
 def create_test_data():
     """Create test data files to ensure Jekyll can build"""
@@ -15,7 +15,7 @@ def create_test_data():
     
     # Create test market data
     test_market_data = {
-        "last_updated": datetime.utcnow().isoformat() + "Z",
+        "last_updated": datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z'),
         "coins": [
             {
                 "symbol": "BTCUSDT",
